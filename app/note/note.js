@@ -1272,15 +1272,6 @@ function parseMarkdownToHTML(text) {
   return html.trim();
 }
 
-window.notes.runtime().then((runtime) => {
-  if (runtime.platform === "linux") {
-    textEl.setAttribute(
-      "placeholder",
-      "Your notes… (capture protection depends on your desktop)",
-    );
-  }
-});
-
 window.addEventListener("resize", () => {
   if (colorPopover.classList.contains("open"))
     positionToolbarPopover(colorPopover, colorBtn);

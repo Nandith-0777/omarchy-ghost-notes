@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="docs/favicon.svg" alt="Ghost Notes logo" width="96" height="96" />
+  <img src="build/icon.png" alt="Ghost Notes logo" width="96" height="96" />
 </p>
 
 <h1 align="center">Ghost Notes</h1>
 
 <p align="center">
-  <b>Translucent sticky notes that float above everything — and stay invisible to screen sharing and recording.</b>
+  <b>Floating sticky notes for your thoughts, plans, and reminders.</b>
 </p>
 
 <p align="center">
@@ -36,6 +36,8 @@ Demoing a take-home assignment? Giving a code walkthrough while sharing your scr
 
 ## Table of contents
 
+- [Developers](#developers)
+- [Current Linux version](#current-linux-version--5-november-2026)
 - [Features](#features)
 - [Install](#install)
 - [How it works](#how-it-works)
@@ -55,6 +57,50 @@ Demoing a take-home assignment? Giving a code walkthrough while sharing your scr
 - [Building a standalone app](#building-a-standalone-app)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Developers
+
+- **Main developer — [Navya Bijoy](https://github.com/navyabijoy):** creator of Ghost Notes / Invisible Notes and the original application.
+- **Co-developer — [Nandith (Nandith-0777)](https://github.com/Nandith-0777):** Linux/Hyprland support, interface updates, shortcut improvements, and the Omarchy integration in this fork.
+
+The original project and its Apache-2.0 license are retained. This fork builds on Navya's work.
+
+## Current Linux version — 5 November 2026
+
+This source update is based on app version **1.2.2**. It includes the changes below; previously built Linux packages do not automatically include them. No new binary release is published by this source update.
+
+### Linux desktop and capture integration
+
+- Added Linux AppImage, Debian, and tar.gz build targets, a user-local launcher and desktop entry, and Linux CI coverage.
+- Use X11/XWayland by default for note positioning, resize, focus, and collapsed bubbles; retain an explicit native Wayland override.
+- Added Hyprland Lua window rules and an optional native companion for **Hyprland 0.56.2**, guarded by the exact compositor build hash. Supported capture paths omit protected notes and show the content behind them. The companion also handles fullscreen pinning and click-through input.
+- Added desktop-pointer recovery for the ghost toolbar and resize corner. Improved pointer scaling and mixed pointer-device handling on XWayland.
+- Added desktop keychain selection and storage status. Unreadable encrypted stores are preserved, JSON writes use owner-only permissions, and encryption failures are reported.
+- Capture exclusion remains desktop- and recorder-specific. **Direct GPU/KMS and direct X11 capture can show notes. GNOME, KDE, other compositors, and other Hyprland builds are not covered by this companion.** Controlled capture and portal tests passed; fresh end-to-end Google Meet and Zoom validation is still required for this package.
+
+### Notes and interface
+
+- Redesigned Notes Manager with a workspace sidebar, note cards, search, counts, and All notes / On desktop / Hidden filters; refined light and dark themes and settings.
+- Separated the floating note toolbar from the writing area, with pastel note colors and a distinct purple ghost icon. Ghost mode has a clear active state.
+- Reorganized **Aa** formatting and appearance controls into compact popovers, with readable groups and no horizontal scrolling at the default note size.
+- Centered note and workspace deletion confirmations inside Notes Manager. Deleting a workspace preserves its notes by moving them into another workspace.
+- Smoothed dragging and resizing by coalescing pointer updates, resizing without resetting the window position, and disabling competing Hyprland note animations.
+- Improved popover positioning, keyboard menu navigation, focus restoration, and access to hidden notes through the manager.
+- Empty notes now say **“A thought, a plan, a little reminder…”**.
+
+### Shortcuts
+
+- Added global actions for New note, Notes Manager, Hide/show all, and Click-through, available while Ghost Notes runs in the tray, even when another app has focus.
+- Added a shortcut editor with manual entry, key recording, review before saving, and reset. Every custom shortcut requires **Ctrl, Alt, Shift, or Super plus another key**; plain letters are rejected.
+- Support function keys, arrows, navigation keys, punctuation, and numpad keys. Pause Ghost Notes shortcuts while recording, detect duplicates, and preserve the previous binding when a desktop conflict prevents registration.
+- Hyprland bindings recover after configuration reloads and remain scoped to the launching installation/profile. Fully quitting Ghost Notes disables its global shortcuts.
+
+### Omarchy plugin and validation
+
+- Prepared a separate [Ghost Notes for Omarchy plugin](https://github.com/Nandith-0777/omarchy-ghost-notes), including the full application source and a bar button: left-click opens Notes Manager; right-click creates a note.
+- Documented explicit installation of a locked Electron runtime, optional capture companion setup, updates, and removal. Loading the bar widget performs no dependency installation or desktop configuration changes.
+- Added regression tests and disposable-profile validation scripts for capture, pointer input, formatting, manager interactions, resizing, and global/custom shortcuts. See [Linux documentation](LINUX.md), [portability boundaries](LINUX-PORTABILITY.md), and [validation results](https://github.com/Nandith-0777/invisible-notes/blob/feat/linux-support/validation/linux-parity-20261105/README.md).
+- The plugin repository is public; marketplace submission is awaiting owner review and approval.
 
 ## Features
 
@@ -87,7 +133,7 @@ Grab the latest build from the **[Releases page](https://github.com/navyabijoy/i
 Prefer to run from source:
 
 ```bash
-git clone https://github.com/navyabijoy/invisible-notes.git
+git clone --branch feat/linux-support https://github.com/Nandith-0777/invisible-notes.git
 cd invisible-notes
 npm install
 npm start
@@ -109,13 +155,13 @@ Content protection is applied before a note is first shown and re-applied after 
 
 ### Note controls
 
-Hover a note to reveal its top bar:
+Use the toolbar at the top of each note:
 
 | Control             | What it does                                                                                                                                             |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ⠿ (drag handle)     | Drag to move the note. Drag any edge or corner to resize.                                                                                                |
+| ⠿ (drag handle)     | Drag to move the note. Drag the bottom-right resize handle to resize.                                                                                    |
 | Color dot           | Opens the palette — pick the note's color.                                                                                                               |
-| Opacity slider      | Fades the note from 30% to 100%.                                                                                                                         |
+| Appearance controls | Change the note color, opacity, and text size.                                                                                                           |
 | **Aa** (Formatting) | Bold / italic / underline / strikethrough, headings, quote, bullet/numbered/check lists, text colors, `{}` monospace.                                    |
 | `A−` / `A+`         | Smaller / larger text.                                                                                                                                   |
 | 📌 Pin              | **Pinned (default):** always on top, even when you switch apps. **Unpinned:** behaves like a normal window.                                              |
@@ -127,6 +173,8 @@ Hover a note to reveal its top bar:
 Permanently deleting a note is only possible from the **Notes Manager** (with a confirmation prompt).
 
 ### Keyboard shortcuts
+
+Linux uses the Windows combinations below (Super is also available for custom shortcuts).
 
 | Action                      | macOS  | Windows            | Scope      |
 | --------------------------- | ------ | ------------------ | ---------- |

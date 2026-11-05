@@ -5,8 +5,9 @@ https://github.com/navyabijoy/invisible-notes
 Copyright 2026 Navya Bijoy
 Licensed under Apache License 2.0; see LICENSE.
 
-Linux/Hyprland integration, interface revisions, and the Omarchy adapter are
-maintained by Nandith-0777. The application snapshot includes local changes
-based on commit 8a98329 from https://github.com/Nandith-0777/invisible-notes.
+Main developer: Navya Bijoy.
+Co-developer: Nandith (Nandith-0777), Linux/Hyprland integration, interface
+revisions, and the Omarchy adapter. The application snapshot includes local changes
+based on commit 342318a from https://github.com/Nandith-0777/invisible-notes.
 
 The preview was generated from disposable sample notes; it contains no user notes.

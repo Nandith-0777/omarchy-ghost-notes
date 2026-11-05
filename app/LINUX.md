@@ -65,7 +65,7 @@ hyprctl configerrors
 hyprctl ghostnotes:status -j
 ```
 
-See [the November validation](validation/linux-parity-20261105/README.md) for
+See [the November validation](https://github.com/Nandith-0777/invisible-notes/blob/feat/linux-support/validation/linux-parity-20261105/README.md) for
 measured coverage. This changes supported compositor capture paths; direct
 GPU/KMS and X11 capture still bypass protection. Other desktops need their own
 implementation. Rebuild the companion after a compositor update.
@@ -90,9 +90,11 @@ limitation rather than claiming Linux notes are universally invisible.
 
 App shortcuts use the same Ctrl-based defaults as Windows. Linux has a stable
 installed desktop identity for portal registration. On Hyprland Lua sessions,
-the global new-note shortcut is registered with the compositor and invokes the
-single-instance `--new-note` command, so recovery does not depend on XWayland
-keyboard focus. Existing conflicting compositor bindings are not overwritten.
+all four global actions are registered with the compositor and invoke the
+single-instance commands `--new-note`, `--manager`, `--toggle-notes`, and
+`--toggle-ghost`, so recovery does not depend on XWayland keyboard focus.
+Ghost Notes must remain running in the tray. Custom shortcuts require Ctrl,
+Alt, Shift, or Super plus another key; edit or record them in Settings → Shortcuts. Existing conflicting compositor bindings are not overwritten.
 Changing a shortcut releases the previous registration.
 
 Other desktops use Electron's globalShortcut integration. Native Wayland
@@ -158,7 +160,7 @@ The smoke test uses a temporary localhost debugging endpoint. Do not enable it
 for normal use; stop the test instance afterward. It changes only the isolated
 test profile. Results are written to `/tmp/ghost-notes-linux-validation`.
 
-See [validation/LINUX-VALIDATION.md](validation/LINUX-VALIDATION.md) for measured
+See [validation/LINUX-VALIDATION.md](https://github.com/Nandith-0777/invisible-notes/blob/feat/linux-support/validation/LINUX-VALIDATION.md) for measured
 results and unverified behavior. A successful unit or API test is not treated
 as proof of physical input delivery or recording privacy.
 

@@ -7,7 +7,7 @@
     "test": "node --test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "node -e \"process.exit(0)\"",
+    "prepare": "node -e \"\"",
     "start": "node scripts/start.js",
     "dist": "electron-builder",
     "dist:mac": "electron-builder --mac",
@@ -118,5 +118,11 @@
   "desktopName": "com.invisiblenotes.app.desktop",
   "engines": {
     "node": ">=22.12.0"
-  }
+  },
+  "contributors": [
+    {
+      "name": "Nandith (Nandith-0777)",
+      "url": "https://github.com/Nandith-0777"
+    }
+  ]
 }

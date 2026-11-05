@@ -13,6 +13,26 @@ supports Hyprland **0.56.2** and must match the running compositor's exact build
 hash. Google Meet, Zoom, and other recorders must be tested with their actual
 capture path. Direct GPU/KMS recorders can still see the notes.
 
+## Developers
+
+- **Main developer — [Navya Bijoy](https://github.com/navyabijoy):** creator of Ghost Notes / Invisible Notes and the original application.
+- **Co-developer — [Nandith (Nandith-0777)](https://github.com/Nandith-0777):** Linux/Hyprland integration, interface updates, shortcuts, and the Omarchy plugin.
+
+## Current version — 0.1.0
+
+The plugin bundles the Linux source update of Ghost Notes 1.2.2. This version includes:
+
+- Redesigned Notes Manager with workspace navigation, search, note cards, and All notes / On desktop / Hidden filters.
+- Clear note toolbars, a purple ghost icon with an active state, compact Aa and appearance controls, and light/dark themes.
+- Smoother dragging and resizing, including scaled XWayland pointer handling.
+- Centered note/workspace deletion dialogs; workspace deletion preserves notes.
+- Four global shortcuts while the app runs in the tray. Users can type or record shortcuts, review before saving, reset defaults, and see conflict feedback. Each shortcut requires Ctrl, Alt, Shift, or Super plus another key.
+- A friendly empty-note prompt: “A thought, a plan, a little reminder…”.
+- Linux desktop/keychain integration and an optional exact-build Hyprland 0.56.2 capture/input companion, with the limitations described above.
+- Regression tests and disposable-profile checks for the manager, formatting, resizing, pointer input, capture, and shortcuts.
+
+See the [complete Linux change summary](app/README.md#current-linux-version--5-november-2026) and [local validation](VALIDATION.md). This source update does not publish new standalone app binaries. Marketplace submission is awaiting owner review and approval.
+
 ## Requirements
 
 - Omarchy 4 / Quattro with the Omarchy shell and XWayland.
@@ -134,7 +154,7 @@ Do not delete unrelated configuration or the note profile.
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). The bundled application is
 derived from [Navya Bijoy's Invisible Notes](https://github.com/navyabijoy/invisible-notes)
-with Linux/Hyprland and interface changes maintained by Nandith-0777. Its original
+with Navya Bijoy credited as the main developer and Nandith-0777 as co-developer for Linux/Hyprland, interface changes, and the Omarchy integration. Its original
 license and attribution are retained. Dependency licenses are included in the
 installed runtime's packages. The screenshot contains disposable sample notes.
 

@@ -1303,6 +1303,11 @@ function renderSettingsBody() {
   settingsBodyEl.appendChild(kicker);
   settingsBodyEl.appendChild(title);
   settingsBodyEl.appendChild(note);
+  const credits = document.createElement("p");
+  credits.className = "field-note";
+  credits.textContent =
+    "Main developer: Navya Bijoy. Co-developer: Nandith (Nandith-0777), Linux/Hyprland support and Omarchy integration.";
+  settingsBodyEl.appendChild(credits);
   if (runtimeInfo) {
     const status = document.createElement("p");
     status.className = "field-note";
