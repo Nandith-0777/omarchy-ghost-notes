@@ -124,8 +124,10 @@ test("shortcut IPC validates combinations and rejects duplicates without changin
   assert.equal(Array.isArray(result), true);
   assert.equal(h.store.getShortcutOverrides().newNote, "Alt+F8");
   assert.ok(
-    h.setShortcut(h.event, { id: "newNote", accelerator: "Ctrl+Shift+M" })
-      .error,
+    h.setShortcut(h.event, {
+      id: "newNote",
+      accelerator: "CommandOrControl+Shift+M",
+    }).error,
   );
   assert.equal(h.store.getShortcutOverrides().newNote, "Alt+F8");
   assert.ok(
