@@ -1,0 +1,122 @@
+{
+  "name": "invisible-notes",
+  "version": "1.2.2",
+  "description": "Ghost Notes: translucent sticky notes that stay invisible to screen sharing and recording.",
+  "main": "main.js",
+  "scripts": {
+    "test": "node --test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "node -e \"process.exit(0)\"",
+    "start": "node scripts/start.js",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "setup:linux": "node scripts/setup-linux.js",
+    "build:capture-plugin": "sh scripts/build-capture-plugin.sh"
+  },
+  "author": "Navya Bijoy",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/Nandith-0777/invisible-notes",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nandith-0777/invisible-notes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Nandith-0777/invisible-notes/issues"
+  },
+  "keywords": [
+    "sticky-notes",
+    "notes",
+    "electron",
+    "screen-sharing",
+    "privacy",
+    "menubar",
+    "overlay"
+  ],
+  "devDependencies": {
+    "electron": "43.6.0",
+    "electron-builder": "^25.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.0",
+    "prettier": "^3.9.6"
+  },
+  "lint-staged": {
+    "*.{js,json,md,yml,yaml,html,css}": "prettier --write"
+  },
+  "build": {
+    "appId": "com.invisiblenotes.app",
+    "productName": "Ghost Notes",
+    "directories": {
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "store.js",
+      "platform.js",
+      "noteWindow.js",
+      "displayUtils.js",
+      "shortcuts.js",
+      "manager.js",
+      "noteSize.js",
+      "note/**",
+      "manager/**",
+      "build/tray-icon.png",
+      "build/tray-icon@2x.png",
+      "integrations/**"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.png",
+      "identity": null,
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Ghost Notes"
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "tar.gz"
+      ],
+      "category": "Office",
+      "icon": "build/icon.png",
+      "executableName": "com.invisiblenotes.app",
+      "desktop": {
+        "StartupWMClass": "com.invisiblenotes.app",
+        "Comment": "Local sticky notes with desktop-dependent capture protection"
+      },
+      "executableArgs": [
+        "--ozone-platform=x11",
+        "--class=com.invisiblenotes.app"
+      ],
+      "maintainer": "Nandith-0777 <184540937+Nandith-0777@users.noreply.github.com>"
+    }
+  },
+  "desktopName": "com.invisiblenotes.app.desktop",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

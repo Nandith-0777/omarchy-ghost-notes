@@ -1,0 +1,9 @@
+{
+  "name": "omarchy-ghost-notes-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "dependencies": {
+    "electron": "43.6.0"
+  }
+}

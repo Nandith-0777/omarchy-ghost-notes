@@ -1,0 +1,479 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="note.css" />
+  </head>
+  <body>
+    <div class="note">
+      <div class="bar" role="toolbar" aria-label="Note controls">
+        <div
+          class="spacer"
+          title="Drag to move note"
+          aria-label="Drag to move note"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <circle cx="8" cy="5" r="1.6" />
+            <circle cx="16" cy="5" r="1.6" />
+            <circle cx="8" cy="12" r="1.6" />
+            <circle cx="16" cy="12" r="1.6" />
+            <circle cx="8" cy="19" r="1.6" />
+            <circle cx="16" cy="19" r="1.6" /></svg
+          ><span class="note-label">Note</span>
+        </div>
+        <div class="toolbar-group">
+          <button class="btn" id="new" title="New note" aria-label="New note">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+          <div class="format-control">
+            <button
+              class="btn"
+              id="formatBtn"
+              title="Text formatting"
+              aria-label="Text formatting"
+              aria-expanded="false"
+            >
+              Aa
+            </button>
+            <div class="format-popover" id="formatPopover">
+              <div
+                class="format-tabs"
+                role="tablist"
+                aria-label="Formatting category"
+              >
+                <button
+                  class="format-tab active"
+                  id="formatTextTab"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="formatTextPanel"
+                >
+                  Text</button
+                ><button
+                  class="format-tab"
+                  id="formatParagraphTab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="formatParagraphPanel"
+                  tabindex="-1"
+                >
+                  Paragraph
+                </button>
+                <button
+                  class="format-tab"
+                  id="formatListsTab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="formatListsPanel"
+                  tabindex="-1"
+                >
+                  Lists
+                </button>
+              </div>
+              <div
+                class="format-panel"
+                id="formatTextPanel"
+                role="tabpanel"
+                aria-labelledby="formatTextTab"
+              >
+                <div class="format-section-label">Text style</div>
+                <div class="inline-formats">
+                  <button
+                    type="button"
+                    class="format-btn format-icon"
+                    data-cmd="bold"
+                    title="B"
+                  >
+                    <b>B</b></button
+                  ><button
+                    type="button"
+                    class="format-btn format-icon"
+                    data-cmd="italic"
+                    title="I"
+                  >
+                    <i>I</i></button
+                  ><button
+                    type="button"
+                    class="format-btn format-icon"
+                    data-cmd="underline"
+                    title="U"
+                  >
+                    <u>U</u></button
+                  ><button
+                    type="button"
+                    class="format-btn format-icon"
+                    data-cmd="strikeThrough"
+                    title="S"
+                  >
+                    <s>S</s>
+                  </button>
+                </div>
+                <div class="format-section-label">Text color</div>
+                <div class="color-palette">
+                  <button
+                    type="button"
+                    class="color-swatch"
+                    data-color="inherit"
+                    style="background: currentColor"
+                    title="Default text"
+                    aria-label="Default text"
+                  ></button
+                  ><button
+                    type="button"
+                    class="color-swatch"
+                    data-color="#ef4444"
+                    style="background: #ef4444"
+                    title="Red text"
+                    aria-label="Red text"
+                  ></button
+                  ><button
+                    type="button"
+                    class="color-swatch"
+                    data-color="#f97316"
+                    style="background: #f97316"
+                    title="Orange text"
+                    aria-label="Orange text"
+                  ></button
+                  ><button
+                    type="button"
+                    class="color-swatch"
+                    data-color="#10b981"
+                    style="background: #10b981"
+                    title="Green text"
+                    aria-label="Green text"
+                  ></button
+                  ><button
+                    type="button"
+                    class="color-swatch"
+                    data-color="#3b82f6"
+                    style="background: #3b82f6"
+                    title="Blue text"
+                    aria-label="Blue text"
+                  ></button
+                  ><button
+                    type="button"
+                    class="color-swatch"
+                    data-color="#8b5cf6"
+                    style="background: #8b5cf6"
+                    title="Purple text"
+                    aria-label="Purple text"
+                  ></button
+                  ><button
+                    type="button"
+                    class="color-swatch"
+                    data-color="#ec4899"
+                    style="background: #ec4899"
+                    title="Pink text"
+                    aria-label="Pink text"
+                  ></button>
+                </div>
+                <button
+                  type="button"
+                  class="format-btn clear-format"
+                  data-cmd="removeFormat"
+                  title="Clear formatting"
+                >
+                  Clear formatting
+                </button>
+              </div>
+              <div
+                class="format-panel"
+                id="formatParagraphPanel"
+                role="tabpanel"
+                aria-labelledby="formatParagraphTab"
+                hidden
+              >
+                <div class="format-section-label">Paragraph style</div>
+                <div class="block-formats">
+                  <button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="formatBlock"
+                    data-val="DIV"
+                    title="Normal text"
+                  >
+                    Normal text</button
+                  ><button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="formatBlock"
+                    data-val="H1"
+                    title="Title"
+                  >
+                    Title</button
+                  ><button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="formatBlock"
+                    data-val="H2"
+                    title="Heading"
+                  >
+                    Heading</button
+                  ><button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="formatBlock"
+                    data-val="H3"
+                    title="Subheading"
+                  >
+                    Subheading
+                  </button>
+                </div>
+                <div class="block-formats">
+                  <button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="formatBlock"
+                    data-val="BLOCKQUOTE"
+                    title="❝ Quote"
+                  >
+                    ❝ Quote</button
+                  ><button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="formatBlock"
+                    data-val="PRE"
+                    title="&lt;/&gt; Code block"
+                  >
+                    &lt;/&gt; Code block
+                  </button>
+                </div>
+              </div>
+              <div
+                class="format-panel"
+                id="formatListsPanel"
+                role="tabpanel"
+                aria-labelledby="formatListsTab"
+                hidden
+              >
+                <div class="format-section-label">Lists</div>
+                <div class="list-formats">
+                  <button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="insertUnorderedList"
+                    title="Bullets"
+                  >
+                    Bullets</button
+                  ><button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="insertOrderedList"
+                    title="Numbers"
+                  >
+                    Numbers</button
+                  ><button
+                    type="button"
+                    class="format-btn"
+                    data-cmd="toggleChecklist"
+                    title="Checklist"
+                  >
+                    Checklist
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="color-control">
+            <button
+              class="btn"
+              id="colorBtn"
+              title="Appearance"
+              aria-label="Appearance: color, opacity, text size"
+              aria-expanded="false"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 7h6m4 0h6M4 17h10m4 0h2" />
+                <circle cx="12" cy="7" r="2" />
+                <circle cx="16" cy="17" r="2" /></svg
+              ><span class="color-dot" id="colorDot"></span>
+            </button>
+            <div class="color-popover" id="colorPopover">
+              <div class="popover-heading">Appearance</div>
+              <div class="appearance-label">Note color</div>
+              <div class="swatches" id="swatches"></div>
+              <label class="appearance-row" for="opacity"
+                ><span>Opacity</span
+                ><span class="opacity-control"
+                  ><input
+                    type="range"
+                    id="opacity"
+                    min="30"
+                    max="100"
+                    title="Opacity"
+                  /><output id="opacityValue" for="opacity">85%</output></span
+                ></label
+              >
+              <div class="appearance-row">
+                <span>Text size</span>
+                <div class="size-stepper">
+                  <button class="btn" id="fontDown" title="Smaller text">
+                    A−</button
+                  ><output id="fontSizeValue" aria-label="Text size">15</output
+                  ><button class="btn" id="fontUp" title="Larger text">
+                    A+
+                  </button>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="format-btn mono-toggle"
+                id="mono"
+                title="Use monospace font for the whole note"
+                aria-pressed="false"
+              >
+                Monospace font <span aria-hidden="true">{ }</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-group">
+          <button
+            class="btn"
+            id="pin"
+            title="Keep note on top"
+            aria-label="Keep note on top"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m16 3 5 5-4 1-3 5-4 1-1-4 5-3 2-5Z" />
+              <path d="m9 15-6 6" />
+            </svg></button
+          ><button
+            class="btn ghost-icon"
+            id="ghost"
+            title="Click-through mode"
+            aria-label="Click-through mode"
+            aria-pressed="false"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 2a8 8 0 0 0-8 8v11a1 1 0 0 0 1.6.8L8 20l3.4 2.55a1 1 0 0 0 1.2 0L16 20l2.4 1.8A1 1 0 0 0 20 21V10a8 8 0 0 0-8-8ZM9 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm6 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z"
+                fill-rule="evenodd"
+              />
+            </svg></button
+          ><button
+            class="btn"
+            id="collapse"
+            title="Collapse to floating dot"
+            aria-label="Collapse to floating dot"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M6 12h12" />
+            </svg></button
+          ><button
+            class="btn"
+            id="close"
+            title="Hide note"
+            aria-label="Hide note"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m7 7 10 10M17 7 7 17" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        id="text"
+        class="editor"
+        contenteditable="true"
+        role="textbox"
+        aria-multiline="true"
+        aria-label="Note text"
+        placeholder="A thought, a plan, a little reminder…"
+        spellcheck="false"
+      ></div>
+      <button
+        class="resize-handle"
+        type="button"
+        title="Drag to resize note"
+        aria-label="Resize note"
+      >
+        ↘
+      </button>
+    </div>
+    <button
+      id="bubble"
+      hidden
+      aria-label="Restore note"
+      title="Click to restore · Drag to move"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <path d="M6 3h9l3 3v15H6z" />
+        <path d="M14 3v5h4M9 12h6M9 16h4" />
+      </svg>
+    </button>
+    <script src="note.js"></script>
+  </body>
+</html>
