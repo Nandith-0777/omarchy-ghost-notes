@@ -67,12 +67,13 @@ if(cmd==='omarchy'){
 }else if(cmd==='hyprctl'){
  if(args[0]==='version')console.log(JSON.stringify({version:'0.56.2',commit:E.FAKE_HASH}));
  else if(args[0]==='clients')console.log('[]');
- else if(args[0]==='configerrors')console.log(E.FAKE_RELOAD_FAIL==='1'&&state.reloads===1?'fixture config error':'');
+ else if(args[0]==='configerrors')console.log(((E.FAKE_RELOAD_FAIL==='1'&&state.reloads===1)||Number(E.FAKE_RELOAD_FAIL_AT)===state.reloads)?'fixture config error':'');
  else if(args[0]==='ghostnotes:status'){if(!state.active)process.exit(1);console.log(JSON.stringify({mode:'compositor-omit'}));}
  else if(args[0]==='plugin'&&args[1]==='unload'){state.active=false;save();}
+ else if(args[0]==='plugin'&&args[1]==='load'){state.active=true;save();}
  else if(args[0]==='reload'){
    state.reloads++;const config=path.join(E.HOME,'.config/hypr/ghost-notes.lua');
-   state.active=fs.existsSync(config)&&fs.readFileSync(config,'utf8').includes('hl.plugin.load');save();
+   state.active=E.FAKE_AUTOLOAD_OFF!=='1'&&fs.existsSync(config)&&fs.readFileSync(config,'utf8').includes('hl.plugin.load');save();
  }
 }else if(cmd==='pkg-config'){
  if(args[0]==='--variable=prefix')console.log(E.FAKE_PREFIX);
@@ -294,4 +295,30 @@ test("app ownership recognizes Electron process titles without matching another 
     ownsAppCommandLine(Buffer.from("electron /other/checkout/app\0"), app),
     false,
   );
+});
+
+test("installer explicitly reloads the companion when config reload does not autoload it", (t) => {
+  const f = fixture(t, { FAKE_AUTOLOAD_OFF: "1" });
+  let result = f.execute("--no-launch");
+  assert.equal(result.status, 0, result.stderr + result.stdout);
+  assert.equal(JSON.parse(fs.readFileSync(f.state)).active, true);
+  assert.ok(
+    f
+      .log()
+      .some((a) => a[0] === "hyprctl" && a[1] === "plugin" && a[2] === "load"),
+  );
+  result = f.execute("--no-launch");
+  assert.equal(result.status, 0, result.stderr + result.stdout);
+  assert.equal(JSON.parse(fs.readFileSync(f.state)).active, true);
+});
+
+test("failed reinstall restores the previously active companion even when autoload is suppressed", (t) => {
+  const f = fixture(t, { FAKE_AUTOLOAD_OFF: "1" });
+  let result = f.execute("--no-launch");
+  assert.equal(result.status, 0, result.stderr);
+  f.env.FAKE_RELOAD_FAIL_AT = "2";
+  result = f.execute("--no-launch");
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /configuration errors/);
+  assert.equal(JSON.parse(fs.readFileSync(f.state)).active, true);
 });

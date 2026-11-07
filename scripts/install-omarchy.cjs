@@ -46,6 +46,16 @@ function nativeStatus() {
     return null;
   }
 }
+function ensureNativeLoaded() {
+  if (nativeStatus()?.mode === "compositor-omit") return;
+  run("hyprctl", ["plugin", "load", native]);
+  const deadline = Date.now() + 3000;
+  while (Date.now() < deadline) {
+    if (nativeStatus()?.mode === "compositor-omit") return;
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100);
+  }
+  throw new Error("Capture companion did not become active");
+}
 function checkConfig() {
   const errors = run("hyprctl", ["configerrors"]);
   if (errors) throw new Error("Hyprland configuration errors: " + errors);
@@ -77,6 +87,7 @@ function stopOwnApp() {
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50);
     }
   }
+  return pids.size > 0;
 }
 const targets = [
   path.join(home, ".local/bin/ghost-notes"),
@@ -266,8 +277,10 @@ function main() {
       "Installed Hyprland headers do not match the running compositor. Restart into the installed version first.",
     );
   run("omarchy", ["plugin", "validate", root]);
+  const previouslyActive = nativeStatus()?.mode === "compositor-omit";
   const snapshot = backup();
   let touched = false;
+  let appWasStopped = false;
   try {
     run("bash", [path.join(root, "scripts/setup.sh")], {
       timeout: 600000,
@@ -277,7 +290,7 @@ function main() {
       timeout: 300000,
       stdio: "inherit",
     });
-    stopOwnApp();
+    appWasStopped = stopOwnApp();
     if (nativeStatus()?.mode === "compositor-omit")
       run("hyprctl", ["plugin", "unload", native]);
     touched = true;
@@ -292,8 +305,7 @@ function main() {
     installAutostart(desktop.launcher);
     run("hyprctl", ["reload"]);
     checkConfig();
-    if (nativeStatus()?.mode !== "compositor-omit")
-      throw new Error("Capture companion did not become active");
+    ensureNativeLoaded();
     run("omarchy", ["plugin", "enable", id, "--section", "right"]);
     optionalDictation();
     saveJSON(stateFile, {
@@ -333,6 +345,7 @@ function main() {
       try {
         run("hyprctl", ["reload"]);
         checkConfig();
+        if (previouslyActive) ensureNativeLoaded();
       } catch (rollback) {
         console.error(
           "Configuration restored but reload needs attention: " +
@@ -340,6 +353,7 @@ function main() {
         );
       }
     }
+    if (appWasStopped) launch();
     throw error;
   }
 }
