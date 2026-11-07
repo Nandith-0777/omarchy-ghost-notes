@@ -3,6 +3,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { execFileSync, spawn } = require("node:child_process");
 const crypto = require("node:crypto");
+const { ownsAppCommandLine } = require("./installer-utils.cjs");
 
 const root = path.resolve(__dirname, "..");
 const id = require("../manifest.json").id;
@@ -61,8 +62,8 @@ function stopOwnApp() {
   for (const pid of pids) {
     if (!Number.isSafeInteger(pid) || pid <= 1)
       throw new Error("Invalid application PID");
-    const args = fs.readFileSync(`/proc/${pid}/cmdline`, "utf8").split("\0");
-    if (!args.includes(path.join(root, "app")))
+    const commandLine = fs.readFileSync(`/proc/${pid}/cmdline`);
+    if (!ownsAppCommandLine(commandLine, path.join(root, "app")))
       throw new Error(
         "Another Ghost Notes installation is running. Quit it before installing this copy.",
       );

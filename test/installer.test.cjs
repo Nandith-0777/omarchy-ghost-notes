@@ -267,3 +267,31 @@ test("bootstrap refuses unsupported builds before installing packages", (t) => {
     false,
   );
 });
+
+test("app ownership recognizes Electron process titles without matching another installation", () => {
+  const { ownsAppCommandLine } = require("../scripts/installer-utils.cjs");
+  const app = "/home/user with spaces/.config/omarchy/plugins/ghost/app";
+  assert.equal(
+    ownsAppCommandLine(Buffer.from("electron\0" + app + "\0--manager\0"), app),
+    true,
+  );
+  assert.equal(
+    ownsAppCommandLine(Buffer.from("electron --manager " + app + "\0"), app),
+    true,
+  );
+  assert.equal(
+    ownsAppCommandLine(Buffer.from("electron " + app + " --manager\0"), app),
+    true,
+  );
+  assert.equal(
+    ownsAppCommandLine(
+      Buffer.from("electron " + app + "-other --manager\0"),
+      app,
+    ),
+    false,
+  );
+  assert.equal(
+    ownsAppCommandLine(Buffer.from("electron /other/checkout/app\0"), app),
+    false,
+  );
+});
