@@ -25,7 +25,14 @@ if [[ ${1:-} != --uninstall ]]; then
 fi
 if [[ ${1:-} != --check && ${1:-} != --uninstall ]]; then
   echo 'Installing missing build/runtime dependencies (sudo may request your password).'
-  omarchy pkg add nodejs npm gcc pkgconf pixman libdrm libxcb xorg-xwayland libsecret gnome-keyring python libxtst wl-clipboard
+  packages=(gcc pkgconf pixman libdrm libxcb xorg-xwayland libsecret gnome-keyring python libxtst wl-clipboard)
+  # Omarchy may already supply a suitable Node runtime through mise.
+  if ! command -v node >/dev/null || ! node -e 'const [major, minor] = process.versions.node.split(".").map(Number); process.exit(major < 22 || (major === 22 && minor < 12) ? 1 : 0)'; then
+    packages+=(nodejs npm)
+  elif ! command -v npm >/dev/null; then
+    packages+=(npm)
+  fi
+  omarchy pkg add "${packages[@]}"
 fi
 command -v node >/dev/null || { echo 'Node.js is required to run the configuration transaction.' >&2; exit 1; }
 exec node "$plugin_root/scripts/install-omarchy.cjs" "$@"
