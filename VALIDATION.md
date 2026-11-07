@@ -43,4 +43,29 @@ headers. The test build was not loaded into the live compositor.
 A read-only preflight passed on Omarchy 4.5.0-3 with Hyprland 0.56.2 at the
 supported exact commit. Existing capture behavior on that laptop was checked
 separately; the user reports successful Google Meet and Zoom sharing.
-A complete fresh-laptop trial remains to be done.
+
+## Real clean-install and reinstall trial
+
+The existing source-based app was stopped, its native companion and desktop
+integration removed, and its note profile moved into a private backup. The
+published GitHub command then installed a new checkout and locked Electron
+runtime, compiled the companion against real headers, configured Hyprland and
+autostart, enabled the bar button, and launched Notes Manager. Shared operating
+system dependencies were retained.
+
+Real keyboard input from another focused application verified new-note,
+manager, and hide/show shortcuts. Ghost-toggle dispatch also completed. Capture
+status reported `compositor-omit`; configuration errors were empty. This trial
+did not include a new meeting/capture recording.
+
+The repeat-install trial exposed two issues: Electron can rewrite `/proc`
+arguments into a process-title string, and config reload does not necessarily
+reload a manually unloaded native plugin. Both were corrected with regression
+tests. A second real installer run subsequently stopped/restarted its own app,
+explicitly reloaded the companion, and left exactly one autostart entry and one
+Ghost Notes source line. Both repositories' code CI runs passed.
+
+Chromium logged graphics/VSync warnings but the app opened and the tested
+operations succeeded. The original note profile was retained privately; no
+private note content is included in this repository. A separate laptop remains
+a useful next compatibility test.

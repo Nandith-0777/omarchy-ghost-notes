@@ -56,8 +56,8 @@ omarchy plugin add https://github.com/Nandith-0777/omarchy-ghost-notes --yes && 
 This is for a fresh installation. An internet connection is required. You may
 be asked for your system password to install missing packages. **No manual
 configuration editing or separate compilation steps are needed.** The automatic
-flow has passed isolated installer tests; a full fresh-laptop trial is still
-pending.
+flow passed a clean-install and reinstall trial on the maintainer's laptop.
+Testing on a second machine is still recommended.
 
 The installer:
 
