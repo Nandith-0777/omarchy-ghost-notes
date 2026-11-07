@@ -98,14 +98,14 @@ const SETTING_TITLES = {
 
 const SCOPE_SECTIONS = [
   {
-    scope: "app",
-    title: "In Ghost Notes",
-    note: "Active while a note or this window has focus, so the same keys stay free in your browser and editor.",
+    scope: "global",
+    title: "Global shortcuts — use from any app",
+    note: "Set your preferred combinations here. They work while another app has focus or all notes are hidden. Ghost Notes must be running in the tray.",
   },
   {
-    scope: "global",
-    title: "Anywhere",
-    note: "Work while another app has focus, including when notes are hidden. Keep Ghost Notes running in the tray.",
+    scope: "app",
+    title: "App-only shortcuts — optional alternatives",
+    note: "These only work while a Ghost Notes window has focus. To use a combination from your browser or editor, change the global shortcut above instead.",
   },
 ];
 
@@ -1052,7 +1052,10 @@ function shortcutEditor(shortcut) {
   editor.className = "shortcut-editor";
   const label = document.createElement("label");
   label.htmlFor = "shortcutDraft";
-  label.textContent = "Your key combination";
+  label.textContent =
+    shortcut.scope === "global"
+      ? "Global combination — works from other apps"
+      : "App-only combination — Ghost Notes must have focus";
   const input = document.createElement("input");
   input.id = "shortcutDraft";
   input.value = shortcutDraft;
@@ -1112,7 +1115,8 @@ function shortcutRow(shortcut) {
   text.className = "sc-text";
   const labelEl = document.createElement("div");
   labelEl.className = "sc-label";
-  labelEl.textContent = shortcut.label;
+  labelEl.textContent =
+    shortcut.scope === "app" ? `${shortcut.label} (app only)` : shortcut.label;
   const descEl = document.createElement("div");
   descEl.className = "sc-desc";
   descEl.textContent =

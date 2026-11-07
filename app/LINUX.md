@@ -116,6 +116,31 @@ Linux ghost-mode toolbar recovery uses a desktop-pointer watcher because Electro
 does not forward ignored mouse motion on Linux. On Hyprland it reads compositor
 pointer coordinates, avoiding stale XWayland coordinates while input is ignored.
 
+## Voice typing with Voxtype on Hyprland
+
+If dictation inserts digits instead of words, the `wtype` virtual keyboard may
+be delivering its temporary keymap incorrectly to an XWayland note. This was
+reproduced independently of speech recognition. Use the optional scoped helper:
+
+```sh
+python3 scripts/voxtype-ghost-notes.py --install
+systemctl --user restart voxtype
+```
+
+Requires Python 3.11+, `hyprctl`, `wl-copy`, `wl-paste`, `libX11`, and `libXtst`.
+The installer backs up `~/.config/voxtype/config.toml` and refuses to replace an
+existing post-processor. Keep this checkout in place. To undo, restore the printed
+backup and restart Voxtype. If using another post-processor, combine the hooks
+manually rather than overwriting it.
+
+Only when a Ghost Notes XWayland note has focus, the helper pastes the transcript
+using native X11 paste keys instead of typing each character. Other apps receive
+the original transcript through Voxtype's existing output method. Click in the
+note's writing area before dictating. Text and clipboard data stay in memory;
+transcriptions are not written to files. The previous clipboard representation
+is restored when available, unless the clipboard changed meanwhile. This does
+not claim compatibility with every dictation tool or other compositors.
+
 ## Storage
 
 On non-KDE Linux desktops, Ghost Notes selects `gnome-libsecret` unless an

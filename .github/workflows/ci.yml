@@ -1,0 +1,23 @@
+name: Validate Ghost Notes for Omarchy
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Check installer syntax
+        run: |
+          for script in scripts/*.sh app/scripts/*.sh; do bash -n "$script"; done
+          node --check scripts/install-omarchy.cjs
+      - name: Test installer and application
+        run: node --test test/*.test.cjs app/test/*.test.js

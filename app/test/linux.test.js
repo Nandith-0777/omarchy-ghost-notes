@@ -87,6 +87,33 @@ test("capture status distinguishes the companion plugin from black masking", () 
   }
 });
 
+test("note status reads do not synchronously query the compositor repeatedly", () => {
+  let queries = 0;
+  const p = platformFor(
+    "linux",
+    {
+      "node:child_process": {
+        execFileSync(_command, args) {
+          if (args[0] === "ghostnotes:status") {
+            queries++;
+            return JSON.stringify({ mode: "compositor-omit" });
+          }
+          return "ok";
+        },
+      },
+    },
+    { HYPRLAND_INSTANCE_SIGNATURE: "test" },
+  );
+  p.installDesktopIntegration();
+  for (let i = 0; i < 30; i++) {
+    assert.equal(p.runtimeStatus().capture.mode, "compositor-omit");
+    p.captureExclusionCaveat();
+  }
+  assert.equal(queries, 1);
+  p.installDesktopIntegration();
+  assert.equal(queries, 2, "Desktop reload must recheck the companion");
+});
+
 test("compositor pointer reader handles split replies and malformed coordinates", async () => {
   const { EventEmitter } = require("node:events");
   for (const reply of ['{"x":120,"y":45}', '{"x":"bad","y":45}']) {
@@ -442,8 +469,11 @@ test("desktop watcher does nothing outside a Hyprland Linux session", () => {
   assert.doesNotThrow(stop);
 });
 
-test("ghost pointer coordinates account for force-zero-scaling XWayland geometry", async (t) => {
+test("native ghost routing does not fight Electron or poll the pointer", async () => {
   const { EventEmitter } = require("node:events");
+  const commands = [],
+    nativeCalls = [],
+    positions = [];
   const p = platformFor(
     "linux",
     {
@@ -455,15 +485,10 @@ test("ghost pointer coordinates account for force-zero-scaling XWayland geometry
           const socket = new EventEmitter();
           socket.setTimeout = () => {};
           socket.destroy = () => {};
-          socket.write = (command) =>
-            socket.emit(
-              "data",
-              JSON.stringify(
-                command === "j/cursorpos"
-                  ? { x: 150, y: 280 }
-                  : { x: 100, y: 200, width: 200, height: 100 },
-              ),
-            );
+          socket.write = (command) => {
+            commands.push(command);
+            socket.emit("data", JSON.stringify({ x: 0, y: 0, blocked: false }));
+          };
           setImmediate(() => socket.emit("connect"));
           return socket;
         },
@@ -472,25 +497,59 @@ test("ghost pointer coordinates account for force-zero-scaling XWayland geometry
     { HYPRLAND_INSTANCE_SIGNATURE: "test", XDG_RUNTIME_DIR: "/tmp" },
   );
   p.runtimeStatus();
-  const positions = [];
-  const native = Buffer.alloc(4);
-  native.writeUInt32LE(42);
   const win = {
     isDestroyed: () => false,
     isVisible: () => true,
-    getNativeWindowHandle: () => native,
-    getBounds: () => ({ x: 9999, y: 9999, width: 250, height: 125 }),
-    setIgnoreMouseEvents() {},
-    webContents: { send: (_channel, point) => positions.push(point) },
+    getNativeWindowHandle: () => Buffer.from([42, 0, 0, 0]),
+    setIgnoreMouseEvents: (ignore) => nativeCalls.push(ignore),
+    webContents: { send: (...args) => positions.push(args) },
   };
-  t.after(() => p.setIgnoreMouseEvents(win, false));
-  p.setIgnoreMouseEvents(win, true, {
-    getCursorScreenPoint: () => ({ x: -1, y: -1 }),
-  });
+  for (const ignore of [true, false, true, false, true])
+    p.setIgnoreMouseEvents(win, ignore, {}, true);
   await new Promise((resolve) => setTimeout(resolve, 120));
-  assert.ok(positions.length > 0);
-  assert.equal(positions[0].x, 62.5);
-  assert.equal(positions[0].y, 100);
+  assert.deepEqual(nativeCalls, [false]);
+  assert.deepEqual(commands, ["j/ghostnotes:input 42 0 1"]);
+  assert.equal(positions.length, 0);
+  p.setIgnoreMouseEvents(win, false, {}, false);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(commands.at(-1), "j/ghostnotes:input 42 0 0");
+  assert.deepEqual(nativeCalls, [false, false]);
+});
+
+test("compositor pin updates never synchronously block mouse handling", async () => {
+  const requests = [];
+  const p = platformFor(
+    "linux",
+    {
+      "node:child_process": {
+        execFileSync() {
+          throw new Error("Pin updates must be asynchronous");
+        },
+        execFile(command, args, options, callback) {
+          requests.push({ args, callback });
+        },
+      },
+    },
+    { HYPRLAND_INSTANCE_SIGNATURE: "test" },
+  );
+  const win = {
+    isDestroyed: () => false,
+    getNativeWindowHandle: () => Buffer.from([42, 0, 0, 0]),
+    setAlwaysOnTop() {},
+  };
+  p.setPinned(win, true);
+  await new Promise((resolve) => setTimeout(resolve, 120));
+  assert.deepEqual([...requests[0].args], ["ghostnotes:pin", "42", "1"]);
+  p.setPinned(win, false);
+  requests[0].callback(null, "not-mapped");
+  await new Promise((resolve) => setTimeout(resolve, 120));
+  assert.equal(
+    requests.length,
+    2,
+    "A stale pin reply must not restart its retry loop",
+  );
+  assert.deepEqual([...requests[1].args], ["ghostnotes:pin", "42", "0"]);
+  requests[1].callback(null, "ok");
 });
 
 test("ghost recovery keeps tracking after toolbar hover restores input", async (t) => {

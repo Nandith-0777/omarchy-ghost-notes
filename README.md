@@ -7,8 +7,9 @@ an independently installed app.
 
 ![Ghost Notes with sample notes](preview.png)
 
-**Capture exclusion is optional and version-specific.** The bar plugin and app
-alone do not make notes invisible to recording. The included native companion
+**Capture exclusion is version-specific.** The one-command installer enables
+the native companion automatically on the supported build. The app/bar alone
+without that companion do not make notes invisible to recording. The included native companion
 supports Hyprland **0.56.2** and must match the running compositor's exact build
 hash. Google Meet, Zoom, and other recorders must be tested with their actual
 capture path. Direct GPU/KMS recorders can still see the notes.
@@ -18,9 +19,9 @@ capture path. Direct GPU/KMS recorders can still see the notes.
 - **Main developer — [Navya Bijoy](https://github.com/navyabijoy):** creator of Ghost Notes / Invisible Notes and the original application.
 - **Co-developer — [Nandith (Nandith-0777)](https://github.com/Nandith-0777):** Linux/Hyprland integration, interface updates, shortcuts, and the Omarchy plugin.
 
-## Current version — 0.1.0
+## Current version — 0.2.0
 
-The plugin bundles the Linux source update of Ghost Notes 1.2.2. This version includes:
+The plugin bundles the Linux source update of Ghost Notes 1.2.2. Version 0.2.0 adds the automatic installation, compatibility checks, configuration backups/rollback, login startup, and removal workflow described below. It also includes:
 
 - Redesigned Notes Manager with workspace navigation, search, note cards, and All notes / On desktop / Hidden filters.
 - Clear note toolbars, a purple ghost icon with an active state, compact Aa and appearance controls, and light/dark themes.
@@ -43,34 +44,77 @@ See the [complete Linux change summary](app/README.md#current-linux-version--5-n
 - Optional capture companion: matching Hyprland development headers, a C++26
   compiler, pkg-config, pixman, libdrm, and xcb-shape development files.
 
-## Install
+## Install — one command
 
-After this repository has been published:
+On **Omarchy 4.5.0** (including package revision `4.5.0-3`) running the supported
+Hyprland **0.56.2**, open a terminal and run:
 
 ```sh
-omarchy plugin add https://github.com/Nandith-0777/omarchy-ghost-notes --enable
-bash ~/.config/omarchy/plugins/io.github.nandith-0777.ghost-notes/scripts/setup.sh
+omarchy plugin add https://github.com/Nandith-0777/omarchy-ghost-notes --yes && bash "$HOME/.config/omarchy/plugins/io.github.nandith-0777.ghost-notes/scripts/install.sh"
 ```
 
-This plugin requires **manual setup** of the Electron runtime. No dependency
-installation, configuration change, or app launch happens merely from loading
-the bar widget. Clicking before setup shows a notification with the setup command.
+This is for a fresh installation. An internet connection is required. You may
+be asked for your system password to install missing packages. **No manual
+configuration editing or separate compilation steps are needed.** The automatic
+flow has passed isolated installer tests; a full fresh-laptop trial is still
+pending.
 
-The runtime lives outside the plugin checkout under
+The installer:
+
+1. Checks the Omarchy version and exact running Hyprland build against
+   [compatibility.json](compatibility.json). Unsupported builds stop before
+   dependency installation or desktop configuration changes.
+2. Installs missing build/runtime dependencies using `omarchy pkg add` and the
+   locked Electron 43.6.0 runtime outside the plugin checkout.
+3. Builds the C++ capture companion against the installed matching headers.
+4. Backs up affected desktop files, installs the launcher and app-menu entry,
+   configures the native companion, and adds login startup for global shortcuts.
+5. Reloads Hyprland, checks configuration errors and the companion status,
+   enables the bar button, and opens Notes Manager.
+6. If Voxtype is already installed without another post-processor, installs the
+   scoped Ghost Notes dictation helper. Other dictation tools are retained.
+
+Configuration failures restore the backed-up files and unload the new companion.
+Installed system packages and downloaded runtimes are retained; the installer
+never deletes a note profile. A running Ghost Notes copy from another checkout
+or an unmanaged capture companion is reported instead of being taken over.
+
+The exact supported compositor commit is
+`efb50993780079460b0cbed1363e2166a2de1d9f`. Matching the Omarchy name alone is not
+enough. The installer checks header compatibility too, so a pending compositor
+upgrade cannot silently build the wrong plugin.
+
+For an existing installation, run the installer again from its installed path.
+It keeps a single autostart entry and retains the original configuration backup.
+To check compatibility without installation, use `bash scripts/install.sh --check`.
+To finish setup without opening the app immediately, use `--no-launch`.
+
+### Notes without the native capture companion
+
+The older manual runtime-only path remains available:
+
+```sh
+bash "$HOME/.config/omarchy/plugins/io.github.nandith-0777.ghost-notes/scripts/setup.sh"
+omarchy plugin enable io.github.nandith-0777.ghost-notes --section right
+```
+
+This path does not enable capture exclusion or login startup. Loading the bar
+widget alone never downloads dependencies or changes desktop configuration.
+The one-command installer is a separate, explicitly invoked action.
+
+The runtime lives under
 `${XDG_DATA_HOME:-~/.local/share}/ghost-notes/omarchy-runtime/<lockfile-sha256>`.
-Dependencies therefore do not interfere with Omarchy's no-symlink plugin
-validation. Run `bash scripts/setup.sh --check` to print its exact location.
-
-For a local working copy, run `bash scripts/setup.sh`, then use
-`bash scripts/launch.sh manager` or `bash scripts/launch.sh new`. Installing the
-bar widget is optional; the bundled app can be tested directly this way.
+It stays outside the plugin tree to avoid dependency symlinks in Omarchy plugin
+validation.
 
 ## Use
 
 - Click the ghost in the bar to open Notes Manager.
 - Right-click it to create a note.
 - Organize notes into workspaces and filter by All notes, On desktop, or Hidden.
-- In Settings → Shortcuts, edit any action, type a combination or use Record keys,
+- In Settings → Shortcuts, edit the Global shortcuts section to use your chosen
+  keys from other apps. App-only shortcuts are separate optional alternatives.
+  Type a combination or use Record keys,
   then save. Ctrl, Alt, Shift, and Super combinations with function keys,
   navigation keys, punctuation, and numpad keys are supported. Conflicts preserve
   the previous shortcut.
@@ -117,14 +161,31 @@ Native pointer and capture hooks need explicit maintainer review.
 
 ```sh
 omarchy plugin update io.github.nandith-0777.ghost-notes
-bash ~/.config/omarchy/plugins/io.github.nandith-0777.ghost-notes/scripts/setup.sh
+bash ~/.config/omarchy/plugins/io.github.nandith-0777.ghost-notes/scripts/install.sh
 ```
 
-Quit and reopen Ghost Notes to use app changes. If you enabled the native
-companion, close notes, rebuild it against the new compositor, and follow the
-companion's unload/reload instructions before relying on exclusion again.
+The installer rebuilds the companion, restarts its own app, and checks the
+configuration. It stops on unsupported compositor upgrades instead of bypassing
+the version guard. For runtime-only installations, retain that setup path if
+you do not want to enable the native companion.
 
 ## Remove
+
+If you used the automatic installer, restore the pre-install desktop files first:
+
+```sh
+bash "$HOME/.config/omarchy/plugins/io.github.nandith-0777.ghost-notes/scripts/install.sh" --uninstall
+omarchy plugin remove io.github.nandith-0777.ghost-notes
+```
+
+The uninstaller closes its own app, unloads the companion, restores the original
+configuration, and keeps notes, runtime downloads, and shared system packages.
+If a managed file has changed since installation, it stops instead of discarding
+your edits; use the retained backup and the manual instructions below to remove
+only the Ghost Notes integration. Do not remove the checkout before unloading
+its native companion.
+
+### Manual removal
 
 Quit Ghost Notes first. If you never enabled the optional capture companion:
 

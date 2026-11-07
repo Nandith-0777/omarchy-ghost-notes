@@ -29,14 +29,15 @@ _No response_
 
 Ghost Notes includes the full Electron application source and a Quattro bar
 widget. Left-click opens Notes Manager; right-click creates a note. Please mark
-this listing as manual-setup: users explicitly run scripts/setup.sh to install
-the locked Electron 43.6.0 runtime outside the plugin tree. Loading the widget
+this listing as manual-setup: users explicitly run scripts/install.sh after adding the repository. This
+installs missing dependencies, the locked Electron 43.6.0 runtime outside the
+plugin tree, and the matching native companion; config changes are backed up. Loading the widget
 performs no installation or desktop configuration changes.
 
 The optional native capture companion uses Hyprland internal APIs, pointer
 input handling, and X11 input shapes. It supports Hyprland 0.56.2 only and rejects
-an exact-build hash mismatch. It requires separate explicit expert setup and
-manual review; the plugin does not promise universal recording exclusion.
+an exact-build hash mismatch. The explicit installer enables it only on the supported build. It requires
+manual maintainer review; the plugin does not promise universal recording exclusion.
 Direct GPU/KMS capture bypasses it. Actual Meet and Zoom capture paths require
 user validation. Dependencies, capture limits, configuration changes, and safe
 removal are documented in README.md. The original Apache-2.0 license and

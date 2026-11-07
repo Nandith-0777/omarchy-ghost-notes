@@ -2,7 +2,7 @@ const shortcutKeys = require("./manager/key-combo");
 const isMac = process.platform === "darwin";
 const isWindows = process.platform === "win32";
 const isLinux = process.platform === "linux";
-const { execFileSync } = require("node:child_process");
+const { execFile, execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 const net = require("node:net");
@@ -13,6 +13,7 @@ const NOTE_TITLE = "Ghost Notes Note";
 let linuxBackend = null;
 let compositorMask = false;
 let compositorOmit = false;
+let captureStatusChecked = false;
 let storageStatus = { encrypted: false, backend: "unavailable" };
 let shortcutStatus = "not-registered";
 let desktopCommand = null;
@@ -21,6 +22,7 @@ let shortcutConflict = false;
 let shortcutOwner = null;
 const pointerRecovery = new WeakMap();
 const inputUpdates = new WeakMap();
+const nativeInputOwners = new WeakSet();
 const pinnedWindows = new WeakMap();
 
 function syncCompositorPin(win, pinned) {
@@ -39,15 +41,23 @@ function syncCompositorPin(win, pinned) {
     if (win.isDestroyed() || pinnedWindows.get(win) !== registration) return;
     try {
       const xid = win.getNativeWindowHandle().readUInt32LE(0);
-      const result = execFileSync(
+      execFile(
         "hyprctl",
         ["ghostnotes:pin", String(xid), pinned ? "1" : "0"],
-        { encoding: "utf8", timeout: 1000, stdio: ["ignore", "pipe", "pipe"] },
+        { encoding: "utf8", timeout: 1000 },
+        (error, result) => {
+          if (
+            error ||
+            win.isDestroyed() ||
+            pinnedWindows.get(win) !== registration
+          )
+            return;
+          if (result.trim() === "not-mapped" && remaining > 0) {
+            registration.timer = setTimeout(() => attempt(remaining - 1), 100);
+            registration.timer.unref?.();
+          }
+        },
       );
-      if (result.trim() === "not-mapped" && remaining > 0) {
-        registration.timer = setTimeout(() => attempt(remaining - 1), 100);
-        registration.timer.unref?.();
-      }
     } catch {
       /* The companion plugin is optional outside Hyprland. */
     }
@@ -164,6 +174,25 @@ function syncCompositorInput(win, ignore, enabled) {
 }
 
 function setIgnoreMouseEvents(win, ignore, screen, recover = ignore) {
+  const native =
+    isLinux &&
+    compositorOmit &&
+    linuxBackend !== "wayland" &&
+    process.env.HYPRLAND_INSTANCE_SIGNATURE &&
+    win.getNativeWindowHandle;
+  if (native && recover) {
+    clearInterval(pointerRecovery.get(win));
+    pointerRecovery.delete(win);
+    if (!nativeInputOwners.has(win)) {
+      // The companion owns both the toolbar hit region and body click-through.
+      // Electron must not overwrite its input shape on every hover transition.
+      win.setIgnoreMouseEvents(false, { forward: true });
+      nativeInputOwners.add(win);
+      syncCompositorInput(win, false, true);
+    }
+    return;
+  }
+  nativeInputOwners.delete(win);
   syncCompositorInput(win, ignore, recover);
   win.setIgnoreMouseEvents(ignore, { forward: true });
   if (!isLinux) return;
@@ -318,6 +347,7 @@ function installDesktopIntegration() {
     compositorMask = false;
     console.warn("Hyprland integration unavailable:", error.message);
   }
+  refreshCaptureStatus();
   return compositorMask;
 }
 
@@ -662,23 +692,27 @@ function setPinned(win, pinned) {
   }
 }
 
+function refreshCaptureStatus() {
+  captureStatusChecked = true;
+  compositorOmit = false;
+  if (!isLinux || !process.env.HYPRLAND_INSTANCE_SIGNATURE) return;
+  try {
+    const status = JSON.parse(
+      execFileSync("hyprctl", ["ghostnotes:status", "-j"], {
+        encoding: "utf8",
+        timeout: 1500,
+        stdio: ["ignore", "pipe", "pipe"],
+      }),
+    );
+    compositorOmit = status.mode === "compositor-omit";
+  } catch {
+    /* Recheck at desktop initialization/reload, never during pointer handling. */
+  }
+}
+
 function captureExclusionCaveat() {
   if (isLinux) {
-    compositorOmit = false;
-    if (process.env.HYPRLAND_INSTANCE_SIGNATURE) {
-      try {
-        const status = JSON.parse(
-          execFileSync("hyprctl", ["ghostnotes:status", "-j"], {
-            encoding: "utf8",
-            timeout: 1500,
-            stdio: ["ignore", "pipe", "pipe"],
-          }),
-        );
-        compositorOmit = status.mode === "compositor-omit";
-      } catch {
-        /* Optional companion plugin is not loaded. */
-      }
-    }
+    if (!captureStatusChecked) refreshCaptureStatus();
     if (compositorOmit)
       return "Protected notes are omitted from compositor-managed screen captures by the Ghost Notes Hyprland plugin. Direct GPU/KMS and X11 capture bypass this protection. Other desktops require their own integration.";
     return compositorMask

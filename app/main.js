@@ -487,10 +487,11 @@ ipcMain.on("note:update", (e, payload) => {
   if (typeof fontSize === "number") patch.fontSize = fontSize;
   if (typeof monospace === "boolean") patch.monospace = monospace;
   if (typeof ghost === "boolean") patch.ghost = ghost;
+  const previousGhost = store.get(id)?.ghost;
   const record = store.update(id, patch);
 
   // Ghost mode forces always-on-top so the toolbar stays reachable; pin is restored when it ends.
-  if (typeof ghost === "boolean" && record) {
+  if (typeof ghost === "boolean" && ghost !== previousGhost && record) {
     const win = noteWindows.get(id);
     if (win && !win.isDestroyed()) {
       platform.setPinned(win, ghost ? true : record.pinned !== false);

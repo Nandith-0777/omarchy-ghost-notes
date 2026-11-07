@@ -84,7 +84,7 @@ This source update is based on app version **1.2.2**. It includes the changes be
 - Separated the floating note toolbar from the writing area, with pastel note colors and a distinct purple ghost icon. Ghost mode has a clear active state.
 - Reorganized **Aa** formatting and appearance controls into compact popovers, with readable groups and no horizontal scrolling at the default note size.
 - Centered note and workspace deletion confirmations inside Notes Manager. Deleting a workspace preserves its notes by moving them into another workspace.
-- Smoothed dragging and resizing by coalescing pointer updates, resizing without resetting the window position, and disabling competing Hyprland note animations.
+- Smoothed dragging and resizing by coalescing pointer updates, resizing without resetting the window position, and disabling competing Hyprland note animations. Native ghost-mode routing owns the input region without competing Electron shape changes or redundant pointer polling; pin updates are asynchronous and capture status is checked at initialization/reload.
 - Improved popover positioning, keyboard menu navigation, focus restoration, and access to hidden notes through the manager.
 - Empty notes now say **“A thought, a plan, a little reminder…”**.
 
@@ -190,6 +190,8 @@ Linux uses the Windows combinations below (Super is also available for custom sh
 | Close dialog / cancel       | `Esc`  | `Esc`              | Manager    |
 
 **Scope** matters: app-scoped shortcuts only fire while a Ghost Notes window has focus, so the same keys stay free for your browser, IDE and OS. The **global** shortcuts work while another application has focus, including when every note is hidden. Ghost Notes must stay running in the tray. Settings → Shortcuts shows a warning if a global combination is already in use.
+
+For combinations that work while using your browser or editor, edit the **Global shortcuts — use from any app** section at the top of **Settings → Shortcuts**. The **App-only** section provides separate optional shortcuts that require a focused Ghost Notes window.
 
 Customize these under **Settings → Shortcuts**: click the pencil, type a combination or click **Record keys**, then **Save shortcut**. Every shortcut requires at least one modifier (Ctrl, Alt, Shift, or Super) plus another key. The editor preserves the modifiers you choose and supports letters, numbers, F1–F24, navigation keys, punctuation, and numpad keys. Duplicate and desktop-reserved combinations are rejected without replacing your previous shortcut. **Reset** restores the default.
 

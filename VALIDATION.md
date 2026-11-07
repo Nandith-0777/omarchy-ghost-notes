@@ -27,3 +27,20 @@ implementation. No fresh Google Meet or Zoom session was tested for this package
 
 Marketplace submission requires the owner's review of `SUBMISSION.md`.
 The checks above describe local validation before the initial publication.
+
+## Automatic installer — 7 November 2026
+
+The one-command installer is tested with disposable homes and mocked package,
+compiler, and compositor commands. Coverage includes fresh installation,
+repeat installation, removal, preserving later user edits, unsupported builds,
+mismatched headers, dependency bootstrap, compiler failure, and configuration
+rollback. No live desktop configuration or real package installation was used
+for those tests.
+
+The real C++ companion also built successfully against this machine's installed
+headers. The test build was not loaded into the live compositor.
+
+A read-only preflight passed on Omarchy 4.5.0-3 with Hyprland 0.56.2 at the
+supported exact commit. Existing capture behavior on that laptop was checked
+separately; the user reports successful Google Meet and Zoom sharing.
+A complete fresh-laptop trial remains to be done.

@@ -132,7 +132,7 @@ function applyGhost() {
     !changingCollapsed &&
     !toolbarMenuOpen()
   ) {
-    setIgnore(true); // pass clicks through by default; the toolbar re-enables
+    setIgnore(!noteEl.querySelector(".bar:hover, .resize-handle:hover"));
   } else {
     setIgnore(false); // fully interactive again
   }

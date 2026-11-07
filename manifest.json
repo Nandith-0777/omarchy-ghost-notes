@@ -2,12 +2,14 @@
   "schemaVersion": 1,
   "id": "io.github.nandith-0777.ghost-notes",
   "name": "Ghost Notes",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Nandith-0777",
   "license": "Apache-2.0",
   "description": "Local sticky notes with workspaces, rich text, and an Omarchy bar launcher. Capture exclusion requires the optional Hyprland companion.",
   "kinds": ["bar-widget"],
-  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
   "barWidget": {
     "displayName": "Ghost Notes",
     "category": "Productivity",
