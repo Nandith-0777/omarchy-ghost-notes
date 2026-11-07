@@ -19,5 +19,9 @@ jobs:
         run: |
           for script in scripts/*.sh app/scripts/*.sh; do bash -n "$script"; done
           node --check scripts/install-omarchy.cjs
+      - name: Install locked test dependency
+        run: npm ci --prefix runtime --ignore-scripts --no-audit --no-fund
       - name: Test installer and application
+        env:
+          NODE_PATH: ${{ github.workspace }}/runtime/node_modules
         run: node --test test/*.test.cjs app/test/*.test.js
