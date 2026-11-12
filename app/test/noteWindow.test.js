@@ -319,3 +319,18 @@ test("persisted collapsed notes start as protected, fixed-size bubbles", async (
   win.emit("show");
   assert.equal(win._contentProtection, true);
 });
+
+test("shared notes stay unprotected across show/restore and can become private again", async () => {
+  const { noteWindow } = loadNoteWindowWithPlatform({ isWindows: true });
+  const win = noteWindow.createNoteWindow(baseRecord({ shareVisible: true }));
+  await new Promise((resolve) => win.once("ready-to-show", resolve));
+  assert.equal(win._contentProtection, false);
+  win.emit("show");
+  win.emit("restore");
+  noteWindow.applyContentProtection(win);
+  assert.equal(win._contentProtection, false);
+  noteWindow.applyContentProtection(win, false);
+  assert.equal(win._contentProtection, true);
+  win.emit("restore");
+  assert.equal(win._contentProtection, true);
+});

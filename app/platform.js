@@ -66,6 +66,44 @@ function syncCompositorPin(win, pinned) {
   registration.timer.unref?.();
 }
 
+const sharingUpdates = new WeakMap();
+function setSharingVisibility(win, shareVisible) {
+  if (!isLinux || !win.setTitle) return;
+  const previous = sharingUpdates.get(win);
+  if (previous?.timer) clearTimeout(previous.timer);
+  const update = { timer: null };
+  sharingUpdates.set(win, update);
+  const title = shareVisible ? NOTE_TITLE + " — Shared" : NOTE_TITLE;
+  if (!shareVisible || !process.env.HYPRLAND_INSTANCE_SIGNATURE) {
+    win.setTitle(title);
+    return;
+  }
+  // Preserve the initial title used to identify notes for input and pinning.
+  // A saved shared note starts private until the compositor has mapped it.
+  const attempt = (remaining) => {
+    if (win.isDestroyed() || sharingUpdates.get(win) !== update) return;
+    try {
+      const xid = win.getNativeWindowHandle().readUInt32LE(0);
+      execFile(
+        "hyprctl",
+        ["ghostnotes:geometry", String(xid)],
+        { encoding: "utf8", timeout: 1000 },
+        (error, result) => {
+          if (win.isDestroyed() || sharingUpdates.get(win) !== update) return;
+          if (!error && result.trim().startsWith("{")) win.setTitle(title);
+          else if (remaining > 0) {
+            update.timer = setTimeout(() => attempt(remaining - 1), 100);
+            update.timer.unref?.();
+          }
+        },
+      );
+    } catch {
+      /* Leave the note private if the capture integration is unavailable. */
+    }
+  };
+  attempt(20);
+}
+
 function compositorPointer(env = process.env, command = "j/cursorpos") {
   return new Promise((resolve) => {
     if (!env.HYPRLAND_INSTANCE_SIGNATURE || !env.XDG_RUNTIME_DIR)
@@ -733,6 +771,7 @@ module.exports = {
   launchArguments,
   installLinuxDesktop,
   noteWindowOptions,
+  setSharingVisibility,
   installDesktopIntegration,
   watchDesktopChanges,
   createStorageCodec,

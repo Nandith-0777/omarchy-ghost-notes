@@ -3,6 +3,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("notes", {
   runtime: () => ipcRenderer.invoke("app:runtime"),
   update: (payload) => ipcRenderer.send("note:update", payload),
+  setShareVisible: (id, shareVisible) =>
+    ipcRenderer.invoke("note:setShareVisible", { id, shareVisible }),
   getState: (id) => ipcRenderer.invoke("note:getState", id),
   setCollapsed: (id, collapsed) =>
     ipcRenderer.invoke("note:setCollapsed", { id, collapsed }),

@@ -234,3 +234,11 @@ runtime's `node_modules` when running `node --test app/test/*.test.js`.
 The native companion has been tested on Hyprland 0.56.2 with disposable scenes,
 including scaled/rotated capture and real pointer delivery. Those checks do not
 establish that every recording or meeting app excludes notes.
+
+### Screen-sharing visibility
+
+Use the monitor-and-arrow button on a note to show it in a screen share. The
+button turns orange while sharing is enabled. Click again to request privacy.
+The choice is saved per note; existing and new notes start private. The ghost
+button continues to control mouse click-through only. This applies to sharing
+a screen containing the note, not an unrelated application window or browser tab.

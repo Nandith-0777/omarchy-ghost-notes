@@ -589,7 +589,7 @@ test("v7 notes migrate to expanded without changing their geometry", () => {
     ],
   });
   const note = store.get("legacy");
-  assert.equal(store.data.version, 8);
+  assert.equal(store.data.version, STORE_VERSION);
   assert.equal(note.collapsed, false);
   assert.equal(note.width, 400);
   assert.equal(note.height, 300);
@@ -616,4 +616,22 @@ test("collapsed notes survive reload and export/import with expanded dimensions"
   assert.equal(imported[0].collapsed, true);
   assert.equal(imported[0].width, 420);
   assert.equal(imported[0].text, "private");
+});
+
+test("sharing visibility defaults private, migrates safely, and persists explicit sharing", () => {
+  const old = freshStore({
+    version: 8,
+    notes: [{ id: "old", text: "keep", shareVisible: true }],
+  });
+  assert.equal(old.get("old").shareVisible, false);
+  const dir = storeDir();
+  const store = openStore(dir);
+  const note = store.create({ text: "share test" });
+  assert.equal(note.shareVisible, false);
+  store.update(note.id, { shareVisible: true });
+  store.flush();
+  assert.equal(openStore(dir).get(note.id).shareVisible, true);
+  store.update(note.id, { shareVisible: false });
+  store.flush();
+  assert.equal(openStore(dir).get(note.id).shareVisible, false);
 });

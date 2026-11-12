@@ -923,3 +923,9 @@ body.dark .bar #ghost:hover {
   color: #24143e;
   background: #d5c0ff;
 }
+
+#shareVisibility.sharing-active {
+  color: #fff;
+  background: #c2410c;
+  box-shadow: 0 0 0 1px #c2410c;
+}

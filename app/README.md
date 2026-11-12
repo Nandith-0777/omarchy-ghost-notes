@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="build/icon.png" alt="Ghost Notes logo" width="96" height="96" />
+  <img src="docs/favicon.svg" alt="Ghost Notes logo" width="96" height="96" />
 </p>
 
 <h1 align="center">Ghost Notes</h1>
@@ -87,6 +87,7 @@ This source update is based on app version **1.2.2**. It includes the changes be
 - Smoothed dragging and resizing by coalescing pointer updates, resizing without resetting the window position, and disabling competing Hyprland note animations. Native ghost-mode routing owns the input region without competing Electron shape changes or redundant pointer polling; pin updates are asynchronous and capture status is checked at initialization/reload.
 - Improved popover positioning, keyboard menu navigation, focus restoration, and access to hidden notes through the manager.
 - Empty notes now say **“A thought, a plan, a little reminder…”**.
+- Added an optional [Voxtype dictation helper](LINUX.md#voice-typing-with-voxtype-on-hyprland) for XWayland notes when simulated typing produces digits. It uses native paste only in focused notes and preserves ordinary dictation elsewhere.
 
 ### Shortcuts
 
@@ -99,7 +100,7 @@ This source update is based on app version **1.2.2**. It includes the changes be
 
 - Prepared a separate [Ghost Notes for Omarchy plugin](https://github.com/Nandith-0777/omarchy-ghost-notes), including the full application source and a bar button: left-click opens Notes Manager; right-click creates a note.
 - Documented explicit installation of a locked Electron runtime, optional capture companion setup, updates, and removal. Loading the bar widget performs no dependency installation or desktop configuration changes.
-- Added regression tests and disposable-profile validation scripts for capture, pointer input, formatting, manager interactions, resizing, and global/custom shortcuts. See [Linux documentation](LINUX.md), [portability boundaries](LINUX-PORTABILITY.md), and [validation results](https://github.com/Nandith-0777/invisible-notes/blob/feat/linux-support/validation/linux-parity-20261105/README.md).
+- Added regression tests and disposable-profile validation scripts for capture, pointer input, formatting, manager interactions, resizing, and global/custom shortcuts. See [Linux documentation](LINUX.md), [portability boundaries](LINUX-PORTABILITY.md), and [validation results](validation/linux-parity-20261105/README.md).
 - The plugin repository is public; marketplace submission is awaiting owner review and approval.
 
 ## Features
@@ -115,6 +116,20 @@ This source update is based on app version **1.2.2**. It includes the changes be
 - **Collapse to bubble** — shrink any note into a small floating dot with one click; drag the dot to reposition it, click it to restore the full note. Content stays intact and invisible while collapsed.
 - **Multi-monitor aware** — each note remembers its display; off-screen notes are recovered automatically.
 - **Local & offline** — one JSON file in your OS app-data folder, optionally encrypted with the OS keychain.
+
+## Install on Omarchy automatically
+
+For the supported Omarchy 4.5.0 and exact Hyprland 0.56.2 build, use the
+[automatic Omarchy installer](https://github.com/Nandith-0777/omarchy-ghost-notes#install--one-command):
+
+```sh
+omarchy plugin add https://github.com/Nandith-0777/omarchy-ghost-notes --yes && bash "$HOME/.config/omarchy/plugins/io.github.nandith-0777.ghost-notes/scripts/install.sh"
+```
+
+It checks compatibility, installs missing dependencies, builds and enables the
+native capture companion, adds launchers and login startup, and opens the app.
+Affected configuration is backed up and configuration failures roll back.
+Capture protection still depends on the actual recorder's capture path.
 
 ## Install
 
@@ -352,3 +367,18 @@ By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
+
+### Show a note in screen sharing
+
+Each note has a monitor-and-arrow button beside the ghost button. Click it to
+show that note in screen sharing; orange means sharing is enabled. Click again
+to request capture protection. This preference survives reopening and restarting.
+Existing and new notes default to private. The ghost button still controls only
+mouse click-through.
+
+Sharing applies to a captured screen containing the note; sharing an unrelated
+application window or browser tab does not include it. Capture protection depends
+on the platform and capture method. In particular, macOS ScreenCaptureKit can
+bypass Electron content protection; turning protection on is not a guarantee
+that viewers cannot see the note. On Hyprland, install the bundled capture
+integration and updated window rules.

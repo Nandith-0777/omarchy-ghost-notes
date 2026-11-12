@@ -70,7 +70,7 @@ The app has no Dock icon on macOS — look for the ghost icon in the menu bar / 
 
 ## Key Invariants
 
-- Every note window has `setContentProtection(true)` applied before it is shown and re-applied after hide/restore on Windows.
+- Every note defaults to capture protection. A note explicitly marked `shareVisible` disables protection; preserve that choice across show/restore.
 - Notes whose saved position is off-screen are clamped to a connected display via `clampToVisibleDisplay` before being shown.
 - The store always has at least one workspace; `removeWorkspace` is a no-op when only one remains.
 - `singleInstanceLock` prevents duplicate note windows from a second launch.

@@ -35,6 +35,7 @@ let state = {
   fontSize: 15,
   monospace: false,
   ghost: false,
+  shareVisible: false,
   pinned: true,
   collapsed: false,
   images: [],
@@ -896,7 +897,28 @@ function sanitizeHTML(html) {
   return temp.innerHTML;
 }
 
+const shareVisibilityButton = document.getElementById("shareVisibility");
+function applyShareVisibility() {
+  const shared = state.shareVisible === true;
+  shareVisibilityButton.setAttribute("aria-pressed", String(shared));
+  const label = shared ? "Hide from screen sharing" : "Show in screen sharing";
+  shareVisibilityButton.title = label;
+  shareVisibilityButton.setAttribute("aria-label", label);
+  shareVisibilityButton.classList.toggle("sharing-active", shared);
+}
+shareVisibilityButton.addEventListener("click", async () => {
+  shareVisibilityButton.disabled = true;
+  try {
+    const result = await window.notes.setShareVisible(id, !state.shareVisible);
+    if (result) state.shareVisible = result.shareVisible;
+    applyShareVisibility();
+  } finally {
+    shareVisibilityButton.disabled = false;
+  }
+});
+
 function applyState() {
+  applyShareVisibility();
   applyColor(state.color);
   root.style.setProperty("--opacity", state.opacity);
   root.style.setProperty("--font-size", state.fontSize + "px");

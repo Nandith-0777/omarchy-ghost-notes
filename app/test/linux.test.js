@@ -667,3 +667,35 @@ test("compositor actions have independent owners and command-line actions", () =
   p.unregisterCompositorShortcut("toggleHideAll");
   assert.match(lua[3], /:toggleHideAll/);
 });
+
+test("sharing waits for mapping and a newer privacy choice cancels stale sharing", () => {
+  const callbacks = [];
+  const platform = platformFor(
+    "linux",
+    {
+      "node:child_process": {
+        execFile(_command, args, _options, callback) {
+          assert.equal(args[0], "ghostnotes:geometry");
+          callbacks.push(callback);
+        },
+      },
+    },
+    { HYPRLAND_INSTANCE_SIGNATURE: "test" },
+  );
+  const titles = [];
+  const handle = Buffer.alloc(4);
+  handle.writeUInt32LE(42);
+  const win = {
+    isDestroyed: () => false,
+    getNativeWindowHandle: () => handle,
+    setTitle: (title) => titles.push(title),
+  };
+  platform.setSharingVisibility(win, true);
+  assert.deepEqual(titles, []);
+  platform.setSharingVisibility(win, false);
+  callbacks[0](null, '{"width":300}');
+  assert.deepEqual(titles, ["Ghost Notes Note"]);
+  platform.setSharingVisibility(win, true);
+  callbacks[1](null, '{"width":300}');
+  assert.deepEqual(titles, ["Ghost Notes Note", "Ghost Notes Note — Shared"]);
+});

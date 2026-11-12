@@ -69,3 +69,17 @@ Chromium logged graphics/VSync warnings but the app opened and the tested
 operations succeeded. The original note profile was retained privately; no
 private note content is included in this repository. A separate laptop remains
 a useful next compatibility test.
+
+## Per-note sharing toggle — 11 November 2026
+
+A disposable note on the supported Omarchy/Hyprland build switched capture
+protection true → false → true using its new screen-sharing button. A temporary
+headless display and public patterned fixture verified captured pixels: private
+and private-again frames matched the background-only baseline, while shared
+mode included the note. Restarting preserved an explicitly shared note; its
+initial identity stayed compatible with input routing and pinning. Reloading
+configuration preserved the sharing choice. Invalid sharing IPC was rejected.
+
+Updated bundled app and installer suite: 142 passed, 7 skipped, no failures.
+This change has not been tested in a new Meet/Zoom call or on physical
+Windows/macOS hardware.

@@ -537,6 +537,24 @@ ipcMain.on("note:setPinned", (e, { id, pinned }) => {
   manager.notifyChanged();
 });
 
+ipcMain.handle("note:setShareVisible", (event, payload) => {
+  if (
+    !payload ||
+    typeof payload.id !== "string" ||
+    typeof payload.shareVisible !== "boolean"
+  )
+    return null;
+  const win = noteWindows.get(payload.id);
+  if (!win || win.isDestroyed() || win.webContents !== event.sender)
+    return null;
+  const record = store.get(payload.id);
+  if (!record) return null;
+  applyContentProtection(win, payload.shareVisible);
+  store.update(payload.id, { shareVisible: payload.shareVisible });
+  manager.notifyChanged();
+  return { shareVisible: payload.shareVisible };
+});
+
 ipcMain.handle("note:getState", (e, id) => store.get(id));
 
 // ---------- Pasted images ----------

@@ -2,7 +2,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const STORE_VERSION = 8;
+const STORE_VERSION = 9;
 
 const {
   DEFAULT_NOTE_WIDTH,
@@ -108,6 +108,7 @@ function defaultRecord(overrides = {}) {
     // `visible`. See the note on effective visibility below.
     workspaceId: overrides.workspaceId || DEFAULT_WORKSPACE_ID,
     ghost: !!overrides.ghost,
+    shareVisible: overrides.shareVisible === true,
     collapsed: overrides.collapsed === true,
     visible: overrides.visible !== undefined ? !!overrides.visible : true,
     pinned: overrides.pinned !== undefined ? !!overrides.pinned : true,
@@ -233,6 +234,12 @@ function migrate(data) {
   } else {
     notes = notes.map((n) => ({ ...n, collapsed: n.collapsed === true }));
   }
+
+  // v9 makes screen-sharing visibility explicit; existing notes stay private.
+  notes = notes.map((n) => ({
+    ...n,
+    shareVisible: data.version >= 9 && n.shareVisible === true,
+  }));
 
   return normalizeWorkspaces({ ...data, notes });
 }

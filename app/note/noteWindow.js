@@ -10,9 +10,16 @@ const {
 } = require("./noteSize");
 
 // Re-apply screen-capture exclusion on a note window.
-function applyContentProtection(win) {
+const sharingVisibility = new WeakMap();
+
+function applyContentProtection(
+  win,
+  shareVisible = sharingVisibility.get(win) === true,
+) {
   if (!win || win.isDestroyed()) return;
-  win.setContentProtection(true);
+  sharingVisibility.set(win, shareVisible === true);
+  win.setContentProtection(shareVisible !== true);
+  platform.setSharingVisibility(win, shareVisible === true);
 }
 
 function createNoteWindow(record, { onMoved, onResized, onClosed } = {}) {
@@ -51,9 +58,10 @@ function createNoteWindow(record, { onMoved, onResized, onClosed } = {}) {
   if (platform.isLinux) {
     win.on("page-title-updated", (event) => event.preventDefault());
   }
+  sharingVisibility.set(win, record.shareVisible === true);
   platform.setPinned(win, record.ghost || record.pinned !== false);
 
-  if (platform.isWindows) {
+  if (platform.isWindows || (platform.isLinux && !platform.isMac)) {
     win.on("show", () => applyContentProtection(win));
     win.on("restore", () => applyContentProtection(win));
   }
